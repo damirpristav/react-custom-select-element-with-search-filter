@@ -1,25 +1,90 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, Fragment } from 'react';
+import './App.scss';
 
-function App() {
+import CustomSelect from './components/CustomSelect';
+import { countries } from './data';
+
+const App = () => {
+  const [formData, setFormData] = useState({
+    countryOne: {
+      value: '',
+      error: ''
+    },
+    countryTwo: {
+      value: 'Croatia',
+      error: ''
+    }
+  });
+
+  const submitHandler = (e) => {
+    e.preventDefault();
+
+    let errors = {};
+    for(let key in formData) {
+      if(formData[key].value === '') {
+        errors[key] = 'Please select one option';
+      }
+    }
+
+    if(Object.keys(errors).length === 0) {
+      console.log(formData.countryOne.value, formData.countryTwo.value);
+      console.log('submit form...');
+    }else {
+      setFormData(prev => {
+        let data = {};
+        for(let key in errors) {
+          data[key] = {
+            ...prev[key],
+            error: errors[key]
+          }
+        }
+
+        return {
+          ...prev,
+          ...data
+        }
+      });
+    }
+  }
+
+  const changeHandler = (value, name) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: {
+        value,
+        error: value !== '' ? '' : prev[name].error
+      }
+    }));
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+    <Fragment>
+      <header>
+        <h1>ReactJS custom select element with search filter</h1>
       </header>
-    </div>
+      <div className="container">
+        <form className="form" onSubmit={submitHandler}>
+          <CustomSelect 
+            label="Select a country"
+            searchPlaceholder="Search"
+            data={countries}
+            value={formData.countryOne.value}
+            onChange={changeHandler}
+            error={formData.countryOne.error}
+            name="countryOne"
+          />
+          <CustomSelect 
+            label="Select another country"
+            data={countries}
+            value={formData.countryTwo.value}
+            onChange={changeHandler}
+            error={formData.countryTwo.error}
+            name="countryTwo"
+          />
+          <button className="btn" type="submit">Submit</button>
+        </form>
+      </div>
+    </Fragment>
   );
 }
 
